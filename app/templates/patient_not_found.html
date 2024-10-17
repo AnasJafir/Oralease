@@ -1,0 +1,15 @@
+<!-- app/templates/patient_not_found.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Not Found</title>
+</head>
+<body>
+    <h1>Patient Not Found</h1>
+    <p>Sorry, no patient found with the name "{{ patient_name }}".</p>
+    <a href="{{ url_for('patients.index') }}">Back to Dashboard</a>
+</body>
+</html>
