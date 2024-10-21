@@ -240,48 +240,55 @@ def get_patient_by_name():
 
     Retrieves the patient record from the database and decrypts the sensitive data.
     Returns a rendered template with the decrypted patient data and related appointments and treatment plans.
-
-    :return: A rendered template with the patient data and related appointments and treatment plans.
     """
     try:
         # Get the patient name to search for from the POST request
-        patient_name = request.form['patient_name']
+        patient_name = request.form['patient_name'].strip()
         
-        # Query the database for a patient with a matching first name or last name
-        # The ilike() method is used to perform a case-insensitive search
-        # The '%' wildcard is used to search for the name anywhere in the first name or last name fields
-        patient = Patient.query.filter(
-            (Patient.first_name.ilike(f'%{patient_name}%')) | 
-            (Patient.last_name.ilike(f'%{patient_name}%'))
-        ).first()
-        
-        # If no patient is found with the given name, return a rendered template with an error message
-        if not patient:
+        # Split the name by spaces to allow searching by first and last names
+        name_parts = patient_name.split()
+
+        # If the user provided both first and last names, search for both
+        if len(name_parts) == 2:
+            first_name, last_name = name_parts
+            patients = Patient.query.filter(
+                (Patient.first_name.ilike(f'%{first_name}%')) &
+                (Patient.last_name.ilike(f'%{last_name}%'))
+            ).all()
+
+        # If only one part was provided, search both first and last names
+        else:
+            patients = Patient.query.filter(
+                (Patient.first_name.ilike(f'%{patient_name}%')) |
+                (Patient.last_name.ilike(f'%{patient_name}%'))
+            ).all()
+
+        # If no patients were found, render an error message
+        if not patients:
             return render_template('patient_not_found.html', patient_name=patient_name)
-            
-        # Create a dictionary with decrypted data to avoid modifying the model instance
-        # This is necessary because the model instance has encrypted fields, but we need to decrypt them to display them
-        patient_data = {
-            'id': patient.id,  # Patient's ID
-            'first_name': patient.first_name,  # Patient's first name
-            'last_name': patient.last_name,  # Patient's last name
-            'date_of_birth': patient.date_of_birth,  # Patient's date of birth
-            'contact_number': decrypt_data(patient.contact_number),  # Patient's contact number (decrypted)
-            'email': decrypt_data(patient.email),  # Patient's email (decrypted)
-            'medical_history': decrypt_data(patient.medical_history)  # Patient's medical history (decrypted)
-        }
         
-        # Fetch related data (appointments and treatment plans) for the patient
-        appointments = Appointment.query.filter_by(patient_id=patient.id).all()  # All appointments for the patient
-        treatment_plans = TreatmentPlan.query.filter_by(patient_id=patient.id).all()  # All treatment plans for the patient
-        
-        # Render the 'view_patient_with_appointments.html' template with the decrypted patient data and related appointments and treatment plans
-        return render_template('view_patient_with_appointments.html', 
-                             patient=patient_data, 
-                             appointments=appointments, 
-                             treatment_plans=treatment_plans)
+        # If a match was found, decrypt patient data for each patient and related appointments and treatment plans
+        patients_data = []
+        for patient in patients:
+            patient_data = {
+                'id': patient.id,
+                'first_name': patient.first_name,
+                'last_name': patient.last_name,
+                'date_of_birth': patient.date_of_birth,
+                'contact_number': decrypt_data(patient.contact_number),
+                'email': decrypt_data(patient.email),
+                'medical_history': decrypt_data(patient.medical_history)
+            }
+            appointments = Appointment.query.filter_by(patient_id=patient.id).all()
+            treatment_plans = TreatmentPlan.query.filter_by(patient_id=patient.id).all()
+            patients_data.append({
+                'patient': patient_data,
+                'appointments': appointments,
+                'treatment_plans': treatment_plans
+            })
+
+        # Render the 'view_patient_with_appointments.html' template with patient data
+        return render_template('view_patient_with_appointments.html', patients_data=patients_data)
                              
     except Exception as e:
-        # Log the error here if you have logging set up
-        return render_template('error.html', 
-                             message="An error occurred while processing your request. Please try again.")
+        return render_template('error.html', message="An error occurred while processing your request.")
