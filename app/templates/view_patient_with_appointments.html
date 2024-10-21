@@ -4,50 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Details</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --success-color: #7ed321;
+            --danger-color: #d0021b;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem;
+        }
+        
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .patient-info {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .appointment-date {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .treatment-diagnosis {
+            font-weight: bold;
+            color: var(--success-color);
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Patient Details</h1>
+    <div class="container">
+        <h1 class="text-center mb-4">Patient Details</h1>
+        {% for entry in patients_data %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>
+                        {{ entry.patient.first_name }} {{ entry.patient.last_name }}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="patient-info">
+                        <p><span class="info-label"><i class="bi bi-calendar me-2"></i>Date of Birth:</span> {{ entry.patient.date_of_birth }}</p>
+                        <p><span class="info-label"><i class="bi bi-telephone me-2"></i>Contact Number:</span> {{ entry.patient.contact_number }}</p>
+                        <p><span class="info-label"><i class="bi bi-envelope me-2"></i>Email:</span> {{ entry.patient.email }}</p>
+                        <p><span class="info-label"><i class="bi bi-clipboard-pulse me-2"></i>Medical History:</span> {{ entry.patient.medical_history }}</p>
+                    </div>
 
-        <h2>{{ patient.first_name }} {{ patient.last_name }}</h2>
-        <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
-        <p><strong>Contact Number:</strong> {{ patient.contact_number }}</p>
-        <p><strong>Email:</strong> {{ patient.email }}</p>
-        <p><strong>Medical History:</strong> {{ patient.medical_history }}</p>
+                    <h3 class="section-title"><i class="bi bi-calendar-check me-2"></i>Appointments</h3>
+                    <ul class="list-group mb-4">
+                        {% if entry.appointments %}
+                            {% for appointment in entry.appointments %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <span class="appointment-date">{{ appointment.appointment_date }}</span>
+                                        - {{ appointment.details }}
+                                    </span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ appointment.appointment_date.strftime('%H:%M') }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item text-center text-muted">No appointments available for this patient.</li>
+                        {% endif %}
+                    </ul>
 
-        <h3>Appointments:</h3>
-        <ul class="list-group mb-4">
-            {% if appointments %}
-                {% for appointment in appointments %}
-                    <li class="list-group-item">
-                        Appointment on {{ appointment.appointment_date }} - {{ appointment.details }}
-                    </li>
-                {% endfor %}
-            {% else %}
-                <li class="list-group-item">No appointments available for this patient.</li>
-            {% endif %}
-        </ul>
-
-        <h3>Treatment Plans:</h3>
-        <ul class="list-group mb-4">
-            {% if treatment_plans %}
-                {% for treatment in treatment_plans %}
-                    <li class="list-group-item">
-                        <strong>Diagnosis:</strong> {{ treatment.diagnosis }}<br>
-                        <strong>Treatment Details:</strong> {{ treatment.treatment_details }}
-                    </li>
-                {% endfor %}
-            {% else %}
-                <li class="list-group-item">No treatment plans available for this patient.</li>
-            {% endif %}
-        </ul>
-
-        <a href="{{ url_for('patients.index') }}" class="btn btn-secondary">Back to Dashboard</a>
+                    <h3 class="section-title"><i class="bi bi-clipboard2-pulse me-2"></i>Treatment Plans</h3>
+                    <ul class="list-group mb-4">
+                        {% if entry.treatment_plans %}
+                            {% for treatment in entry.treatment_plans %}
+                                <li class="list-group-item">
+                                    <p class="mb-1"><span class="treatment-diagnosis">Diagnosis:</span> {{ treatment.diagnosis }}</p>
+                                    <p class="mb-0"><span class="info-label">Treatment Details:</span> {{ treatment.treatment_details }}</p>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item text-center text-muted">No treatment plans available for this patient.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="text-center">
+            <a href="{{ url_for('patients.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
     </div>
 
-    <!-- Bootstrap JS + Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
