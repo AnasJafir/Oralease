@@ -10,8 +10,8 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    email = db.Column(db.String(100), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -68,9 +68,9 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    date_of_birth = db.Column(db.Date, nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False, index=True)
     contact_number = db.Column(db.LargeBinary, nullable=False)  # Store encrypted data as LargeBinary
-    email = db.Column(db.LargeBinary, unique=True, nullable=False)  # Store encrypted data as LargeBinary
+    email = db.Column(db.LargeBinary, unique=True, nullable=False, index=True)  # Store encrypted data as LargeBinary
     medical_history = db.Column(db.LargeBinary, nullable=True)  # Store encrypted data as LargeBinary
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
@@ -212,8 +212,8 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
 
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
-    appointment_date = db.Column(db.DateTime, nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False, index=True)
+    appointment_date = db.Column(db.DateTime, nullable=False, index=True)
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
@@ -246,7 +246,7 @@ class InventoryItem(db.Model):
     __tablename__ = 'inventory_items'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, index=True)
     description = db.Column(db.Text, nullable=True)
     quantity = db.Column(db.Integer, nullable=False)
     threshold = db.Column(db.Integer, default=25)  # Default threshold for reminders
@@ -338,10 +338,10 @@ class TreatmentPlan(db.Model):
     __tablename__ = 'treatment_plans'
 
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False, index=True)
     diagnosis = db.Column(db.Text, nullable=False)
     treatment_details = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(50), default='Pending')  # Status could be Pending, Ongoing, Completed
+    status = db.Column(db.String(50), default='Pending', index=True)  # Status could be Pending, Ongoing, Completed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
