@@ -120,7 +120,7 @@ OralEase is a web-based application designed to manage dental clinic operations.
 ------------
 
 * Encryption: uses the `cryptography` library for encryption and decryption
-* Authentication: uses Flask-Login for user authentication
+* Authentication: uses custom session-based login system for user authentication
 * Authorization: uses role-based access control (RBAC) for authorization
 
 **Database**
