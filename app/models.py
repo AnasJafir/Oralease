@@ -286,50 +286,6 @@ class InventoryItem(db.Model):
         """
         return f"<InventoryItem {self.name}>"
 
-    # Method to check if the item is below the 25% threshold
-    def is_below_threshold(self):
-        """
-        Checks if the quantity of the item is below the 25% threshold
-        (i.e. if the quantity is less than 25% of the threshold).
-
-        The purpose of this method is to determine if the item is running low
-        (i.e. if the quantity is below the 25% threshold). If the item is below
-        the threshold, the method will return True, otherwise it will return
-        False.
-
-        The method takes no arguments and returns a boolean value.
-
-        The method uses the quantity and threshold attributes of the
-        InventoryItem instance to determine if the item is below the
-        threshold.
-
-        To check if the item is below the threshold, the method first multiplies
-        the threshold by 0.25. This is because the threshold is the maximum
-        quantity of the item that we want to have on hand, and we want to
-        generate a reminder when the quantity of the item is below 25% of that
-        maximum.
-
-        The method then compares the quantity of the item to the result of
-        multiplying the threshold by 0.25. If the quantity is less than the
-        result, the method returns True, indicating that the item is below the
-        25% threshold. Otherwise, the method returns False.
-
-        :return: boolean indicating if the item is below the 25% threshold
-        """
-        # First, get the quantity and threshold of the item
-        quantity = self.quantity
-        threshold = self.threshold
-
-        # Next, calculate 25% of the threshold
-        twenty_five_percent_of_threshold = threshold * 0.25
-
-        # Then, compare the quantity to 25% of the threshold
-        if quantity < twenty_five_percent_of_threshold:
-            # If the quantity is less than 25% of the threshold, return True
-            return True
-        else:
-            # Otherwise, return False
-            return False
 
 
 # models.py
