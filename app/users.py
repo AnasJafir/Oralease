@@ -66,7 +66,7 @@ def admin_required(f):
     return decorated_function
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
-@admin_required  # Only allow access to users with admin privileges
+#@admin_required  # Only allow access to users with admin privileges
 def register():
     """
     Handles the registration of new users.
