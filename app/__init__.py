@@ -9,17 +9,25 @@ app = Flask(__name__, template_folder='templates')
 
 app.secret_key = os.environ.get('ENCRYPTION_KEY')
 
-app.config['SESSION_COOKIE_SECURE'] = True  # Ensure cookie is sent only over HTTPS
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'  # Ensure cookie is sent only over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Reduce risk of XSS attacks
 app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'  # CSRF protection
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Optional: session duration in seconds
 
 # Set up the database URI
-username = os.environ.get('DB_USERNAME') or 'your_username'
-password = os.environ.get('DB_PASSWORD') or 'your_password'
-dbname = os.environ.get('DB_NAME') or 'your_db_name'
+if 'DATABASE_URL' in os.environ:
+    # Railway provides DATABASE_URL
+    database_url = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Local development configuration
+    # Replace 'your_username', 'your_password', and 'your_db_name' with your actual database credentials
+    username = os.environ.get('DB_USERNAME') or 'your_username'
+    password = os.environ.get('DB_PASSWORD') or 'your_password'
+    dbname = os.environ.get('DB_NAME') or 'your_db_name'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{username}:{password}@localhost/{dbname}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{username}:{password}@localhost/{dbname}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
