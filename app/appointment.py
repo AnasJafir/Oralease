@@ -1,7 +1,7 @@
 # app/features/appointments.py
 
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
-from app import db
+from app.extensions import db
 from app.models import Appointment, Patient, InventoryItem
 from datetime import datetime, timedelta
 from app.authentication_decorators import login_required, role_required

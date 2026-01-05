@@ -1,0 +1,28 @@
+<!-- templates/xray_analysis.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>X-Ray Analysis</title>
+</head>
+<body>
+    <h1>X-Ray Analysis</h1>
+    <form id="xrayForm" enctype="multipart/form-data">
+        <input type="file" id="xrayImage" name="xray_image">
+        <button type="button" onclick="analyzeXray()">Analyze</button>
+    </form>
+    <div id="analysisResults"></div>
+
+    <script>
+        // JavaScript to handle X-ray image upload and analysis
+        async function analyzeXray() {
+            const formData = new FormData(document.getElementById('xrayForm'));
+            const response = await fetch('/api/xray_analysis', {
+                method: 'POST',
+                body: formData
+            });
+            const results = await response.json();
+            document.getElementById('analysisResults').innerText = JSON.stringify(results);
+        }
+    </script>
+</body>
+</html>

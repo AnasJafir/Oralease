@@ -1,0 +1,22 @@
+<!-- templates/treatment_plan.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Treatment Plan</title>
+</head>
+<body>
+    <h1>Treatment Plan</h1>
+    <div id="treatmentPlanDetails"></div>
+
+    <script>
+        // JavaScript to display treatment plan details
+        async function getTreatmentPlan() {
+            const response = await fetch('/api/treatment_plans');
+            const data = await response.json();
+            document.getElementById('treatmentPlanDetails').innerText = JSON.stringify(data);
+        }
+
+        getTreatmentPlan();
+    </script>
+</body>
+</html>

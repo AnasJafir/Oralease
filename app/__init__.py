@@ -1,96 +1,68 @@
 # app/__init__.py
-
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
-import os
+from flask_cors import CORS
+from config import DevelopmentConfig
+from app.extensions import db, jwt, ma, migrate
 
-app = Flask(__name__, template_folder='templates')
+def create_app(config_class=DevelopmentConfig):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
 
-app.secret_key = os.environ.get('ENCRYPTION_KEY')
+    # Activer CORS pour le front (dev + prod déployée sur Vercel)
+    CORS(
+        app,
+        resources={r"/api/*": {
+            "origins": [
+                "http://localhost:5173",
+                "https://localhost:5173",
+                # Frontend déployé (à adapter avec l'URL Vercel réelle)
+                "https://oralease-frontend.vercel.app",
+            ],
+            "supports_credentials": False
+        }}
+    )
 
-app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'  # Ensure cookie is sent only over HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True  # Reduce risk of XSS attacks
-app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'  # CSRF protection
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # Optional: session duration in seconds
+    # Initialisation des extensions
+    db.init_app(app)
+    jwt.init_app(app)
+    ma.init_app(app)
+    migrate.init_app(app, db)
 
-# Set up the database URI
-if 'DATABASE_URL' in os.environ:
-    # Railway provides DATABASE_URL
-    database_url = os.environ.get('DATABASE_URL')
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-else:
-    # Local development configuration
-    # Replace 'your_username', 'your_password', and 'your_db_name' with your actual database credentials
-    username = os.environ.get('DB_USERNAME') or 'your_username'
-    password = os.environ.get('DB_PASSWORD') or 'your_password'
-    dbname = os.environ.get('DB_NAME') or 'your_db_name'
+    # --- Enregistrement des APIs V2 (Backend complet) ---
+    
+    # 1. Authentification
+    from app.apis.auth_api import auth_api_bp
+    app.register_blueprint(auth_api_bp)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{username}:{password}@localhost/{dbname}'
+    # 2. Patients
+    from app.apis.patients_api import patients_api_bp
+    app.register_blueprint(patients_api_bp)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # 3. Rendez-vous
+    from app.apis.appointments_api import appointments_api_bp
+    app.register_blueprint(appointments_api_bp)
 
-db = SQLAlchemy(app)
+    # 4. Inventaire
+    from app.apis.inventory_api import inventory_api_bp
+    app.register_blueprint(inventory_api_bp)
 
-# Create a test route for database connection
-@app.route('/test_db', methods=['GET'])
-def test_db_connection():
-    """
-    A simple test route for verifying database connection.
+    # 5. Traitements & IA (Nouveau)
+    from app.apis.treatments_api import treatment_api_bp
+    app.register_blueprint(treatment_api_bp)
 
-    This route is for testing only and is not intended to be part of the actual
-    application. It is useful for verifying that the database connection is
-    successful and that the app is configured correctly.
+    from app.apis.xray_api import xray_api_bp
+    app.register_blueprint(xray_api_bp)
 
-    The route executes a simple SQL query to check if the database connection is
-    successful. The query is: `SELECT current_database();`
+    # 6. Dashboard
+    from app.apis.dashboard_api import dashboard_api_bp
+    app.register_blueprint(dashboard_api_bp)
 
-    If the connection is successful, the route will return a JSON response with a
-    success message and the name of the current database.
+    # 7. Facturation (Nouveau)
+    from app.apis.invoices_api import invoices_api_bp
+    app.register_blueprint(invoices_api_bp)
+    
+    @app.route('/status')
+    def status():
+        return {"status": "API V2 (Full Backend) Online", "db": "Connected"}
 
-    If the connection fails, the route will return a JSON response with an error
-    message and the error details.
-
-    Returns:
-        dict: A dictionary containing a message and the current database name.
-    """
-
-    try:
-        # Execute a simple query
-        # The query is: SELECT current_database();
-        # The result will be the name of the current database
-        result = db.session.execute(text("SELECT current_database();")).scalar()
-        
-        # Return a JSON response with a success message and the current database name
-        return {"message": "Database connection successful!", "current_database": result}
-
-    except Exception as e:
-        # If there is an error, return a JSON response with an error message and the error details
-        return {"error": str(e), "message": "Database connection failed!"}
-
-# Import routes and apis
-from app.patients import patients_bp
-from app.appointment import appointments_bp
-from app.inventory import inventory_bp
-from app.users import auth_bp
-from app.treatment_plan import treatment_bp
-from app.apis.patients_api import patients_api_bp
-from app.apis.appointments_api import appointments_api_bp
-from app.apis.inventory_api import inventory_api_bp
-from app.apis.treatment_plan_api import treatment_api_bp
-from app.apis.users_api import auth_api_bp
-
-app.register_blueprint(patients_bp)
-app.register_blueprint(appointments_bp)
-app.register_blueprint(inventory_bp)
-app.register_blueprint(treatment_bp)
-app.register_blueprint(auth_bp)
-app.register_blueprint(patients_api_bp)
-app.register_blueprint(appointments_api_bp)
-app.register_blueprint(inventory_api_bp)
-app.register_blueprint(treatment_api_bp)
-app.register_blueprint(auth_api_bp)
-
-# Create the database tables
-with app.app_context():
-    db.create_all()
+    return app

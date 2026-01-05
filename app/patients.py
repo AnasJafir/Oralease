@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
-from app import db
+from app.extensions import db
 from app.utils.encryption import encrypt_data, decrypt_data
 from app.models import Patient, Appointment, InventoryItem, TreatmentPlan
 from datetime import datetime, timedelta

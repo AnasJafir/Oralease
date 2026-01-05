@@ -2,7 +2,7 @@
 
 from flask import Blueprint, request, jsonify, session, flash, redirect, url_for
 from app.models import User, InventoryItem, Appointment
-from app import db
+from app.extensions import db
 from datetime import datetime, timedelta
 from functools import wraps
 
