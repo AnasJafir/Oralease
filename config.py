@@ -5,10 +5,10 @@ from datetime import timedelta
 class Config:
     """Configuration de base."""
     # Clé secrète pour Flask (Sessions, CSRF)
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     
     # Configuration Base de données
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://postgres:jaf.1995@localhost/oralease')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'client_encoding': 'utf8'
