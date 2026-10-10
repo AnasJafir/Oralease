@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Local databases / instance data (may contain PII)
+instance/
+*.sqlite3
+*.db
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Misc
+*.log
+.DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
