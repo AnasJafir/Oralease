@@ -156,10 +156,3 @@ OralEase is licensed under the MIT License.
 * Flask 3.0.3+ for web framework
 * PostgreSQL 13+ for database management
 * Bootstrap 5.3.0-alpha1+ for styling
-
-**Contact**
-----------
-
-For questions or feedback, please contact us at [https://github.com/AnasJafir](https://github.com/AnasJafir).
-
-or via Email: dr.anas.jafir@gmail.com
