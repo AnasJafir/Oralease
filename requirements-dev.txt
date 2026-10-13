@@ -1,0 +1,32 @@
+# Dépendances de développement / test — jeu complet et autonome.
+# Usage : pip install -r requirements-dev.txt && pytest
+# Épinglé pour s'installer depuis des wheels sur Python 3.11 à 3.14
+# (ne référence pas requirements.txt, dont certains pins ne s'installent pas
+#  proprement : psycopg2 source, flask-cors manquant, marshmallow non épinglé).
+
+# --- Core Flask / DB ---
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+SQLAlchemy==2.0.35
+Werkzeug==3.0.4
+psycopg2-binary==2.9.13
+cryptography==43.0.1
+
+# --- API V2 ---
+flask-cors==6.0.5
+Flask-JWT-Extended==4.7.4
+# marshmallow 3.x : le code utilise l'API 3 (load_default, @validates, load_instance).
+marshmallow==3.26.2
+Flask-Marshmallow==1.4.0
+marshmallow-sqlalchemy==1.5.0
+python-dotenv==1.2.4
+
+# --- IA (importée au boot via xray_api -> ai_utils -> gemini_service) ---
+google-generativeai==0.8.6
+Pillow
+
+# --- Tests ---
+pytest==9.1.1
