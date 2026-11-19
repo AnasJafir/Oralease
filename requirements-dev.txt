@@ -24,9 +24,5 @@ Flask-Marshmallow==1.4.0
 marshmallow-sqlalchemy==1.5.0
 python-dotenv==1.2.4
 
-# --- IA (importée au boot via xray_api -> ai_utils -> gemini_service) ---
-google-generativeai==0.8.6
-Pillow
-
 # --- Tests ---
 pytest==9.1.1

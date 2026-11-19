@@ -50,9 +50,6 @@ def create_app(config_class=DevelopmentConfig):
     from app.apis.treatments_api import treatment_api_bp
     app.register_blueprint(treatment_api_bp)
 
-    from app.apis.xray_api import xray_api_bp
-    app.register_blueprint(xray_api_bp)
-
     # 6. Dashboard
     from app.apis.dashboard_api import dashboard_api_bp
     app.register_blueprint(dashboard_api_bp)

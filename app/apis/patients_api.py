@@ -99,7 +99,7 @@ def delete_patient(id):
         patient = Patient.query.get_or_404(id)
         
         # Suppresssion manuelle des dépendances pour éviter les problèmes de cascade/intégrité
-        from app.models import Appointment, TreatmentPlan, Invoice, Quote, DentalChart, XRayAnalysis
+        from app.models import Appointment, TreatmentPlan, Invoice, Quote, DentalChart
         
         # IMPORTANT: L'ordre peut compter pour éviter les FK violations entre enfants
         
@@ -115,7 +115,6 @@ def delete_patient(id):
         
         # 4. Autres données cliniques
         DentalChart.query.filter_by(patient_id=id).delete()
-        XRayAnalysis.query.filter_by(patient_id=id).delete()
         
         # 5. Le Patient lui-même
         db.session.delete(patient)

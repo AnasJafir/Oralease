@@ -175,7 +175,7 @@ Current Appointment model lacks:
 
 ### Frontend Limitations
 - No offline support
-- No file upload (for X-rays)
+- No file upload
 - No print functionality
 - No multi-language support
 - No accessibility (ARIA) labels

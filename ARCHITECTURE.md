@@ -1,6 +1,6 @@
 # Oralease – Architecture and Modularity
 
-This document describes the current architecture of Oralease (Flask + SQLAlchemy + PostgreSQL) and proposes a modular target design to support scale, AI features, and production-readiness.
+This document describes the current architecture of Oralease (Flask + SQLAlchemy + PostgreSQL) and proposes a modular target design to support scale and production-readiness.
 
 ---
 
@@ -10,7 +10,6 @@ This document describes the current architecture of Oralease (Flask + SQLAlchemy
 - Database: PostgreSQL
 - Auth: Session-based (decorators), planned JWT for APIs
 - Frontend: Server-rendered Jinja templates (Bootstrap); future SPA optional
-- AI: Gemini Vision (current), YOLOv8 (recommended)
 - Security: cryptography.Fernet for PHI encryption
 
 ---
@@ -44,11 +43,8 @@ HTTP → Flask (app) → Blueprint route → View (db/session/access) → SQLAlc
   - Expose REST-like endpoints, currently without schema validation.
 
 - Data Layer:
-  - `app/models.py`: `User`, `Patient` (encrypted PHI), `Appointment`, `InventoryItem`, `TreatmentPlan`, `DentalChart`, `XRayAnalysis`, `TreatmentSuggestion`.
+  - `app/models.py`: `User`, `Patient` (encrypted PHI), `Appointment`, `InventoryItem`, `TreatmentPlan`, `DentalChart`.
   - Encryption helpers in `app/utils/encryption.py` using environment-provided Fernet key.
-
-- AI Utilities:
-  - `app/ai_utils.py`: integrates Gemini Vision; also defines an X-ray analysis API route (should be moved to `app/apis/xray_api.py` for separation).
 
 - Presentation:
   - `templates/` for Jinja views, `static/` for assets.
@@ -71,8 +67,6 @@ HTTP → Flask (app) → Blueprint route → View (db/session/access) → SQLAlc
 - `InventoryItem(id, name, description, quantity, threshold, unit)`
 - `TreatmentPlan(id, patient_id, diagnosis, treatment_details, status)`
 - `DentalChart(id, patient_id, tooth_data[JSON])`
-- `XRayAnalysis(id, patient_id, xray_image[bytes], analysis_results[JSON])`
-- `TreatmentSuggestion(id, treatment_plan_id, suggestion_details, confidence_score)`
 
 Relationships are defined via SQLAlchemy relationships on `Appointment` and `TreatmentPlan` to `Patient`.
 
@@ -102,7 +96,6 @@ Pros:
 Gaps:
 - App creation and extension init are not using the application factory pattern, making testing and configuration harder.
 - Validation and error handling cross-cutting concerns are not centralized (schema validation, error mappers).
-- AI route lives inside `ai_utils.py` (violates separation of concerns).
 - `db.create_all()` at import time couples runtime with schema creation; replace with Alembic.
 - No service layer or repository abstraction; views mix business logic and persistence.
 
@@ -115,7 +108,7 @@ Adopt a layered, testable architecture with clear boundaries and extension point
 ```
 Presentation (Blueprints/REST) ─┐
                                ├── Service Layer (domain logic, transactions)
-External Integrations (AI, S3) ┘           │
+External Integrations (storage) ┘          │
                                            ├── Repository Layer (ORM access, queries)
                                            └── Data Layer (SQLAlchemy models)
 
@@ -150,20 +143,7 @@ Cross-cutting: Config, Validation (Schemas), Auth/JWT, Logging, Errors, Caching,
 - `app/errors/`
   - Exception types and global error handlers mapping to JSON problem responses.
 
-### 6.3 AI Integration Abstraction
-
-- `app/ai/ai_service.py` (interface)
-  - `class AIAnalysisService(ABC): analyze_xray(image_bytes) -> dict`
-
-- `app/ai/gemini_service.py`, `app/ai/yolov8_service.py`
-  - Concrete implementations; load credentials/models via env; robust error handling; confidence scoring.
-
-- `app/apis/xray_api.py`
-  - API endpoints use `AIServiceFactory` to select backend (`GEMINI` or `YOLOV8`) via config.
-
-- Optional microservice: expose AI inference via separate container with REST/gRPC to decouple compute from web app.
-
-### 6.4 Cross-Cutting Enhancements
+### 6.3 Cross-Cutting Enhancements
 
 - Auth:
   - Sessions for web, JWT for APIs; role-based decorators consume claims.
@@ -194,17 +174,12 @@ app/
   services/
   schemas/
   errors/
-  ai/
-    ai_service.py
-    gemini_service.py
-    yolov8_service.py
   apis/
     patients_api.py
     appointments_api.py
     inventory_api.py
     treatment_plan_api.py
     users_api.py
-    xray_api.py
   web/
     patients.py
     appointment.py
@@ -220,16 +195,15 @@ static/
 ## 8) Evolution Plan
 
 - Phase 1: Introduce `create_app`, move Blueprint registrations into factory, initialize extensions lazily.
-- Phase 2: Extract AI routes from `ai_utils.py` to `app/apis/xray_api.py`; implement AI service abstraction.
-- Phase 3: Add schemas, repositories, and services; migrate views to call services.
-- Phase 4: Replace `db.create_all()` with Alembic; add indexes and connection pooling.
-- Phase 5: Add JWT for APIs, CSRF for web forms, rate limits, caching, and structured logging.
+- Phase 2: Add schemas, repositories, and services; migrate views to call services.
+- Phase 3: Replace `db.create_all()` with Alembic; add indexes and connection pooling.
+- Phase 4: Add JWT for APIs, CSRF for web forms, rate limits, caching, and structured logging.
 
 ---
 
 ## 9) Modularity Benefits
 
 - Testability: Unit-test services and repositories without Flask app context.
-- Scalability: Swap AI backends, move heavy inference to microservice, scale web and workers independently.
-- Maintainability: Reduced coupling between view logic, persistence, and AI.
+- Scalability: Scale web and workers independently.
+- Maintainability: Reduced coupling between view logic, persistence, and presentation.
 - Security: Centralized validation, error handling, and auth hardening.

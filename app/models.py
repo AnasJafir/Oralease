@@ -44,7 +44,6 @@ class Patient(db.Model):
     appointments = db.relationship('Appointment', backref='patient', cascade='all, delete-orphan')
     treatment_plans = db.relationship('TreatmentPlan', backref='patient', cascade='all, delete-orphan')
     dental_charts = db.relationship('DentalChart', backref='patient', cascade='all, delete-orphan')
-    xray_analyses = db.relationship('XRayAnalysis', backref='patient', cascade='all, delete-orphan')
     invoices = db.relationship('Invoice', backref='patient', cascade='all, delete-orphan')
     quotes = db.relationship('Quote', backref='patient', cascade='all, delete-orphan')
 
@@ -93,14 +92,6 @@ class DentalChart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id', ondelete='CASCADE'), nullable=False)
     tooth_data = db.Column(db.JSON, nullable=True)
-
-class XRayAnalysis(db.Model):
-    __tablename__ = 'xray_analyses'
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id', ondelete='CASCADE'), nullable=False)
-    xray_image = db.Column(db.LargeBinary, nullable=False)
-    analysis_results = db.Column(db.JSON, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Invoice(db.Model):
     __tablename__ = 'invoices'
